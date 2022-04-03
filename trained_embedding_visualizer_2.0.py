@@ -38,8 +38,10 @@ def fetch_random_indexes_per_cluster(dfs, number_of_samples_per_df = 100):
     #exit()
     return  random_indexes_overall
 
-def annotate_members(df, random_indexes_to_annotate, palette, x_axis = 'x-axis', y_axis = 'y-axis', text_column = 'text', annotate_specific_labels = False, additional_members = None):
+def annotate_members(df, random_indexes_to_annotate, palette, x_axis = 'x-axis', y_axis = 'y-axis', text_column = 'text', annotate_specific_labels = False, additional_members = None, additional_member_color = 'black', already_annotated_text=['dummy']):
     overal_texts = []
+    overal_texts_2 = []
+    annotated_texts = []
     random_indexes_to_annotate = list(random_indexes_to_annotate)
     additional_member_df_indexes = None
     if annotate_specific_labels == True:
@@ -48,18 +50,28 @@ def annotate_members(df, random_indexes_to_annotate, palette, x_axis = 'x-axis',
         random_indexes_to_annotate = np.unique(random_indexes_to_annotate)
 
     for i in random_indexes_to_annotate:
-        # plt.text(df[x_axis][i], df[y_axis][i], df[text_column][i], horizontalalignment='left', size='medium',
-        #      color=palette[df['label'][i]], weight='semibold')
-    #     plt.text(df[x_axis][i], df[y_axis][i], df[text_column][i], horizontalalignment='left', size='medium',
-    #              color='black', weight='semibold')
-        if ((i in additional_member_df_indexes) and (additional_member_df_indexes!=None)) and (annotate_specific_labels!=False) and (additional_members!=None):
-            overal_texts.append(plt.text(df[x_axis][i], df[y_axis][i], df[text_column][i], color='black', fontsize=14))
-            continue
+        if (additional_member_df_indexes!=None) and (annotate_specific_labels!=False) and (additional_members!=None):
+            if i in additional_member_df_indexes:
+                if  (df[text_column][i] not in already_annotated_text):
+                    annotated_texts.append(df[text_column][i])
+                    #print('here')
+                    overal_texts.append(plt.text(df[x_axis][i], df[y_axis][i], df[text_column][i], color=additional_member_color, fontsize=30,wrap=True))
+                else:
+                    continue
+                continue
         #16,13
-        overal_texts.append(plt.text(df[x_axis][i], df[y_axis][i], df[text_column][i], fontsize= 14))
+        if  (df[text_column][i] not in already_annotated_text):
+            annotated_texts.append(df[text_column][i])
+            overal_texts.append(plt.text(df[x_axis][i], df[y_axis][i], df[text_column][i], fontsize= 14))
+        else:
+            continue
     #print(overal_texts)
-    adjust_text(overal_texts)
-    #adjust_text(overal_texts, arrowprops=dict(arrowstyle='->', color='red'))
+    #ultimate_text = np.unique([*overal_texts, *overal_texts_2])
+    #adjust_text(overal_texts, expand_text = (0.20,0.20), expand_objects = (0.20,0.20))
+    #adjust_text(overal_texts_2, expand_text=(0.5,0.5))
+    #adjust_text(overal_texts, arrowprops=dict(arrowstyle='->', color='red'), expand_text=(2, 1.5))
+    adjust_text(overal_texts, arrowprops=dict(arrowstyle='->', color='red'), expand_text=(0.3, 2.5))
+    return annotated_texts
     #return overal_texts
 
 
@@ -91,28 +103,40 @@ def reduce_dimension(alg_type = 'pca', dim = 2):
 
 def scatter_plot(x, y, data, hue, n_clusters, palette ,title, xlabel, ylabel):
     palette_subset = [palette[i] for i in range(n_clusters)]
-    p1 = sns.scatterplot(x, y, data=data, hue=hue, palette=palette_subset )
+    p1 = sns.scatterplot(x, y, data=data, hue=hue, palette=palette_subset, s = 80)
     plt.title(title)
+
+    # for i in range(n_clusters):
+    #     current_label = 'cluster ' + str(i)
+    #     for t, l in zip(p1._legend.texts, current_label):
+    #         t.set_text(l)
+    #p1._legend(['A','B', 'C', 'D', 'E'])
+
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     return p1
 
 if __name__ == "__main__":
     #TODO input the embeddings, entity to id file
-    trained_emb_dir = '/home/mirza/PycharmProjects/pythonProject1/Negative-Sampling_LM/SANS-master-KMeans/data/mojtaba_data/location_embedding__embedding_transE_quad.npy'
+    trained_emb_dir = '/home/mirza/PycharmProject/Trained Embedding Visualizer/data/umls/trained_embeddings/umls_entity_embedding-SANS-KMEANS-Hita1.npy'
     #trained_emb_2_dir = '/home/mirza/PycharmProjects/pythonProject1/Negative-Sampling_LM/SANS-master-KMeans/data/umls/trained_embedding/sans-kmeans-pretrained (1).npy'
-    entity_to_id_dict_dir = '/home/mirza/PycharmProjects/pythonProject1/Negative-Sampling_LM/SANS-master-KMeans/data/mojtaba_data/entities/locations.dict'
+    entity_to_id_dict_dir = '/home/mirza/PycharmProject/Trained Embedding Visualizer/data/umls/dictionary_files/entities.dict'
     #TODO input the embedding type: 1. pca, 2. TSNE, 3. ISOMAP 4. SpectralEmbedding
     alg_type = 'TSNE'
     #TODO input the number of text samples in the graph per cluster
-    n_text = 0
+    n_text = 15
     #TODO input the number of clusters
-    n_clusters = 8
+    n_clusters = 6
     #TODO input the color pallete
     palette = sns.color_palette("tab10")
 
     #TODO if we want to use same random numbers!
     np.random.seed(42)
+
+    sns.set(font_scale=2)
+
+    #TODO image title
+    image_title = 'Trained Embedding Visualization for From Our Approach'
 
     # trained_Emb = torch.load('/home/mirza/PycharmProjects/pythonProject1/Negative-Sampling_LM/SANS-master-KMeans/data/mahfuza apu data/MTE_FS_entity.pkl', map_location=torch.device('cpu'))
     # trained_Emb = pd.DataFrame(trained_Emb.weight.detach().numpy())
@@ -188,35 +212,61 @@ if __name__ == "__main__":
     #additional_members= ['group_attribute', 'classification', 'clinical_device', 'self_help_or_relief_organization', 'regulation_or_law', 'governmental_or_regulatory_activity']
     additional_members = ['clinical_drug', 'drug_delivery_device', 'medical_device',
            'manufactured_object', 'research_device']
+    additional_members_2 = [
+         'idea_or_concept', 'spatial_concept',
+         'molecular_sequence',
+          'language']
 
-
+    #intellectual_product, functional_concept
 
     # additional_members = ['biomedical_occupation_or_discipline',
     #                       'occupation_or_discipline',
     #                      'sign_or_symptom',
     #                       'substance']
     #print(random_indexes_to_annotate)
-
+    #TODO label label names, keep one
+    #TODO overlapping one should be removed
+    #TODO axis labels needs to be removed
+    #TODO keep only one legend
     fig = plt.figure(figsize=(14,12))
-
-    scatter_plot('x-axis', 'y-axis',
+    x_axis = alg_type + '_1'
+    y_axis = alg_type + '_2'
+    p1 = scatter_plot('x-axis', 'y-axis',
                  data = info_df,
                  hue = 'label',
                  n_clusters=n_clusters,
                  palette = palette,
-                 title = 'Location clustering',
-                 xlabel = 'x-axis',
-                 ylabel = 'y-axis')
+                 title = image_title,
+                 xlabel = '',
+                 ylabel = '')
 
-    overal_texts = annotate_members(info_df, random_indexes_to_annotate, palette, 'x-axis', 'y-axis', 'text', annotate_specific_labels=True, additional_members= additional_members)
-    annotate_centroids(centroids, palette)
+    current_labels = ['cluster ' + str(i) for i in range(n_clusters)]
+    for i in range(n_clusters):
+        #current_label = 'cluster ' + str(i)
+        for t, l in zip(p1.legend_.texts, current_labels):
+            t.set_text(l)
+    new_title = 'Obtained Clusters'
+    p1.legend_.set_title(new_title)
+
+    #plt.legend(labels=["A", "B", "C", "D", "E"], title="clusters")
+
+    already_annotated_text = annotate_members(info_df, random_indexes_to_annotate, palette, 'x-axis', 'y-axis', 'text', annotate_specific_labels=True, additional_members= additional_members, additional_member_color='green')
+    additional_members_2 = list([*already_annotated_text, *additional_members_2])
+    #print(additional_members_2)
+    already_annotated_text_second = annotate_members(info_df, random_indexes_to_annotate, palette, 'x-axis', 'y-axis', 'text',
+                                     annotate_specific_labels=True, additional_members=additional_members_2, additional_member_color='red', already_annotated_text=already_annotated_text)
+    #annotate_centroids(centroids, palette)
     draw_convex_haul(dfs=individual_df_per_cluster, palette=palette)
     #fig = plt.gcf()
-    plt.legend()
+    #plt.legend()
+    p1.legend_.remove()
+    #plt.legend(labels=["A", "B", "C", "D", "E", "F"], title="clusters")
     plt.tight_layout()
     plt.show()
+    p1.set(xlabel=None)
+    p1.set(ylabel=None)
 
-    plt.title('generated_image/Trained Embedding Using Random')
+    plt.title('Trained Embedding Clustering based on FastText')
     #fig.set_size_inches(8, 6)
-    fig.savefig("", dpi=100)
+    fig.savefig("generated_image/Trained_embedding_KNS", dpi=100)
 
