@@ -16,6 +16,13 @@ def get_cosine_similarity(vec_a, vec_b):
     cos_sim = dot(vec_a, vec_b) / (norm(vec_a) * norm(vec_b))
     return cos_sim
 
+def get_diagonal_mask(data):
+    temp = np.ones_like(np.array(data), dtype=bool)
+    mask = np.ones_like(temp, dtype=bool)
+    mask[:,:] = False
+    mask[np.diag_indices_from(mask)] = True
+    return mask
+
 def break_label(text_list, max_length, max_words_per_line = 1, sep = ' '):
     final_list = []
     for text in text_list:
@@ -25,7 +32,7 @@ def break_label(text_list, max_length, max_words_per_line = 1, sep = ' '):
             big_text_flag = True
             text_tokens = str.split(text, sep=sep)
             word_count = 1
-            print(text)
+            #print(text)
             for t in text_tokens:
                 print(word_count)
                 if word_count != 1:
@@ -64,8 +71,8 @@ if __name__ == "__main__":
     embedding_file = np.load('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/codex-m/trained_embedding/entity_embedding-transE-codexM-Uniform.npy')
     #embedding_file
 
-    scaler = MinMaxScaler()
-    embedding_file = scaler.fit_transform(embedding_file)
+    #scaler = MinMaxScaler()
+    #embedding_file = scaler.fit_transform(embedding_file)
 
     entities_dict = pd.read_table('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/codex-m/dictionary_files/entities.dict', header=None)
 
@@ -85,9 +92,13 @@ if __name__ == "__main__":
     added_labels = break_label(label_text, max_length=20, max_words_per_line=2, sep=' ')
     arr.index = added_labels
     arr.columns = added_labels
-
-    cmap = sns.light_palette("blue", as_cmap=True)
-    sns.heatmap(arr, cmap = cmap)
+    #d = np.array(arr)
+    # cmap = sns.diverging_palette(100, 7, s=75, l=40,
+    #                              n=5, center="light", as_cmap=True)
+    #mask = np.triu(np.ones_like(arr, dtype=bool))
+    mask = get_diagonal_mask(arr)
+    cmap = sns.light_palette("green", as_cmap=True)
+    sns.heatmap(arr , mask = mask, fmt='.2f' ,square = True ,cmap = cmap, annot = True)
     #sns.heatmap(arr, robust=True, fmt="f", cmap='RdBu_r', vmin=0, vmax=2)
     plt.xticks(rotation=45)
     plt.tight_layout()
