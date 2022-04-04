@@ -15,21 +15,22 @@ def get_cosine_similarity(vec_a, vec_b):
     cos_sim = dot(vec_a, vec_b) / (norm(vec_a) * norm(vec_b))
     return cos_sim
 
-def break_label(text_list, max_length, max_words_per_line = 2):
+def break_label(text_list, max_length, max_words_per_line = 2, sep = ' '):
     final_list = []
     for text in text_list:
         big_text_flag = False
         updated_word = ''
         if len(text)>=max_length:
             big_text_flag = True
-            text_tokens = str.split(text, sep=' ')
-            print(text_tokens)
+            text_tokens = str.split(text, sep=sep)
+            #print(text_tokens)
             word_count = 0
             for t in text_tokens:
-                if word_count%2==0:
-                    updated_word = updated_word +' ' + t + '\n'
-                else:
-                    updated_word = updated_word + ' ' + t
+                if word_count != 0:
+                    if word_count%max_words_per_line==0:
+                        updated_word = updated_word +sep + t + '\n'
+                    else:
+                        updated_word = updated_word + sep + t
                 word_count += 1
         if big_text_flag == True:
             final_list.append(updated_word)
@@ -48,25 +49,25 @@ def get_similarity_metrix(df, subset =None):
     return  df_metrix
 
 sns.set(font_scale=1.2)
-embedding_file = np.load('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/codex-m/trained_embedding/codex-m_Embedings-transformer.npy')
-entities_dict = pd.read_table('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/codex-m/dictionary_files/entities.dict', header=None)
+embedding_file = np.load('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/umls/trained_embeddings/UMLS_Embedings-transformer.npy')
+entities_dict = pd.read_table('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/umls/dictionary_files/entities.dict', header=None)
 
 data = build_df(embedding_file, entities_dict)
 
-# list_of_names = ['medical_device', 'drug_delivery_device',
-#                  'research_device', 'research_activity',
-#                  'manufactured_object', 'clinical_drug',
-#                  'molecular_sequence', 'spacial_concept', 'molecular_sequence','language', 'idea_or_concept', 'human', 'mammal', 'food']
+list_of_names = ['medical_device', 'drug_delivery_device',
+                 'research_device', 'research_activity',
+                 'manufactured_object', 'clinical_drug',
+                 'molecular_sequence', 'spacial_concept', 'molecular_sequence','language', 'idea_or_concept', 'human', 'mammal', 'food']
 
-list_of_names = ['German botanist', 'German botanist and author', 'city in Hessen , Germany', 'city in Hesse , Germany',
-                 'German Jewish philosopher and theologian', 'German poet , philosopher , historian , and playwright', 'Italian politician and economist', '1933 American Warner Bros musical film']
+# list_of_names = ['German botanist', 'German botanist and author', 'city in Hessen , Germany', 'city in Hesse , Germany',
+#                  'German Jewish philosopher and theologian', 'German poet , philosopher , historian , and playwright', 'Italian politician and economist', '1933 American Warner Bros musical film']
 
 
 
 fig = plt.figure(figsize=(14,12))
 arr = get_similarity_metrix(data, subset=list_of_names)
 label_text = arr.index
-added_labels = break_label(label_text, max_length=20, max_words_per_line=2)
+added_labels = break_label(label_text, max_length=20, max_words_per_line=1, sep='_')
 arr.index = added_labels
 arr.columns = added_labels
 
@@ -77,6 +78,6 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 
 #plt.title('Trained Embedding Clustering based on FastText')
-fig.savefig("generated_image/", dpi=100)
+fig.savefig("generated_image/codex uniform", dpi=100)
 plt.show()
 
