@@ -23,15 +23,21 @@ def break_label(text_list, max_length, max_words_per_line = 2, sep = ' '):
         if len(text)>=max_length:
             big_text_flag = True
             text_tokens = str.split(text, sep=sep)
-            #print(text_tokens)
+            print(text_tokens)
             word_count = 0
             for t in text_tokens:
                 if word_count != 0:
                     if word_count%max_words_per_line==0:
                         updated_word = updated_word +sep + t + '\n'
+                        word_count+=1
                     else:
                         updated_word = updated_word + sep + t
-                word_count += 1
+                        word_count+=1
+                else:
+                    updated_word = updated_word + sep +t
+                    word_count += 1
+                    continue
+
         if big_text_flag == True:
             final_list.append(updated_word)
         else:
@@ -62,8 +68,6 @@ if __name__ == "__main__":
 
     # list_of_names = ['German botanist', 'German botanist and author', 'city in Hessen , Germany', 'city in Hesse , Germany',
     #                  'German Jewish philosopher and theologian', 'German poet , philosopher , historian , and playwright', 'Italian politician and economist', '1933 American Warner Bros musical film']
-
-
 
     fig = plt.figure(figsize=(14,12))
     arr = get_similarity_metrix(data, subset=list_of_names)
