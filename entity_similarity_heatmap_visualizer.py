@@ -5,6 +5,7 @@ from numpy import dot
 from numpy.linalg import norm
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 def build_df(embedding_file, entities_dict):
     embedding_df = pd.DataFrame(embedding_file)
@@ -61,6 +62,11 @@ def get_similarity_metrix(df, subset =None):
 if __name__ == "__main__":
     sns.set(font_scale=1.5)
     embedding_file = np.load('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/codex-m/trained_embedding/entity_embedding-transE-codexM-Uniform.npy')
+    #embedding_file
+
+    scaler = MinMaxScaler()
+    embedding_file = scaler.fit_transform(embedding_file)
+
     entities_dict = pd.read_table('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/codex-m/dictionary_files/entities.dict', header=None)
 
     data = build_df(embedding_file, entities_dict)
@@ -87,6 +93,6 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     #plt.title('Trained Embedding Clustering based on FastText')
-    fig.savefig("generated_image/uml uniform", dpi=100)
+    fig.savefig("generated_image/codex uni", dpi=100)
     plt.show()
 
