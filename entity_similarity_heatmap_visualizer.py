@@ -15,7 +15,7 @@ def get_cosine_similarity(vec_a, vec_b):
     cos_sim = dot(vec_a, vec_b) / (norm(vec_a) * norm(vec_b))
     return cos_sim
 
-def break_label(text_list, max_length, max_words_per_line = 2, sep = ' '):
+def break_label(text_list, max_length, max_words_per_line = 1, sep = ' '):
     final_list = []
     for text in text_list:
         big_text_flag = False
@@ -23,20 +23,25 @@ def break_label(text_list, max_length, max_words_per_line = 2, sep = ' '):
         if len(text)>=max_length:
             big_text_flag = True
             text_tokens = str.split(text, sep=sep)
-            word_count = 0
+            word_count = 1
+            print(text)
             for t in text_tokens:
-                print(t)
-                if word_count != 0:
-                    print(word_count)
+                print(word_count)
+                if word_count != 1:
+                    #print(word_count)
                     if word_count%max_words_per_line==0:
+                    #if word_count == 2:
+                        #print(t)
                         updated_word = updated_word +sep + t + '\n'
+                        word_count += 1
                     else:
                         updated_word = updated_word + sep + t
+                        word_count += 1
                 else:
                     updated_word = t
                     word_count += 1
                     continue
-                word_count+=1
+
         if big_text_flag == True:
             final_list.append(updated_word)
         else:
@@ -54,7 +59,7 @@ def get_similarity_metrix(df, subset =None):
     return  df_metrix
 
 if __name__ == "__main__":
-    sns.set(font_scale=1.2)
+    sns.set(font_scale=1.5)
     embedding_file = np.load('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/codex-m/trained_embedding/entity_embedding-transE-codexM-Uniform.npy')
     entities_dict = pd.read_table('/home/mirza/PycharmProject/Trained Embedding Visualizer/data/codex-m/dictionary_files/entities.dict', header=None)
 
@@ -82,6 +87,6 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     #plt.title('Trained Embedding Clustering based on FastText')
-    fig.savefig("generated_image/codex uniform", dpi=100)
+    fig.savefig("generated_image/uml uniform", dpi=100)
     plt.show()
 
